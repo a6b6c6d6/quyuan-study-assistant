@@ -52,7 +52,12 @@ export function createSampleState(): StudyState {
   })
 
   return {
-    settings: { examName: '2027 考研', examDate: '2027-12-20', dailyHours: 4 },
+    settings: {
+      examName: '2027 考研',
+      examDate: '2027-12-20',
+      dailyHours: 4,
+      subjectRatios: { math: 40, english: 25, politics: 15, major: 20 },
+    },
     sessions,
     tasks,
     checkins,

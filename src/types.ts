@@ -6,6 +6,7 @@ export interface Settings {
   examName: string
   examDate: string
   dailyHours: number
+  subjectRatios: Record<SubjectKey, number>
 }
 
 export interface StudySession {

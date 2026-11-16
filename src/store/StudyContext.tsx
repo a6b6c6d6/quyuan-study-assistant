@@ -9,6 +9,7 @@ import {
 import type { Checkin, Settings, StudySession, StudyState, SubjectKey } from '../types'
 import { addDays, dateKey, fromKey, startOfWeek, todayKey } from '../lib/date'
 import { uid } from '../lib/format'
+import { normalizeSubjectRatios } from '../lib/plan'
 import { defaultTasks } from '../data/tasks'
 import { SUBJECTS } from '../data/subjects'
 import { createSampleState } from '../data/sample'
@@ -23,6 +24,7 @@ function createEmptyState(settings?: Partial<Settings>): StudyState {
       examDate: '2027-12-20',
       dailyHours: 4,
       ...settings,
+      subjectRatios: normalizeSubjectRatios(settings?.subjectRatios),
     },
     sessions: [],
     tasks: defaultTasks(date),
@@ -42,7 +44,11 @@ function loadState(): StudyState {
     return {
       ...base,
       ...saved,
-      settings: { ...base.settings, ...(saved.settings ?? {}) },
+      settings: {
+        ...base.settings,
+        ...(saved.settings ?? {}),
+        subjectRatios: normalizeSubjectRatios(saved.settings?.subjectRatios),
+      },
       sessions: Array.isArray(saved.sessions) ? saved.sessions : [],
       tasks: Array.isArray(saved.tasks) ? saved.tasks : base.tasks,
       checkins: Array.isArray(saved.checkins) ? saved.checkins : [],

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { ArchOrnament } from '../components/Ornaments'
 import { Stamp } from '../components/Stamp'
+import { DEFAULT_SUBJECT_RATIOS, SUBJECTS } from '../data/subjects'
 import { daysUntil, formatDateLabel } from '../lib/date'
 import { minutesToClock } from '../lib/format'
 import { buildPlanBlocks } from '../lib/plan'
 import { useStudy } from '../store/StudyContext'
+import type { SubjectKey } from '../types'
 
 const FIXED_TASKS = [
   { time: '07:30', text: '单词 20 个', note: '早读先过一遍' },
@@ -16,10 +18,43 @@ export function PlanPage() {
   const { state, updateSettings } = useStudy()
   const { settings } = state
   const [hoursText, setHoursText] = useState(String(settings.dailyHours))
+  const [ratioOpen, setRatioOpen] = useState(false)
+  const [draftRatios, setDraftRatios] = useState<Record<SubjectKey, number>>(() => ({
+    ...settings.subjectRatios,
+  }))
   const countdown = Math.max(0, daysUntil(settings.examDate))
-  const blocks = buildPlanBlocks(settings.dailyHours)
+  const blocks = buildPlanBlocks(settings.dailyHours, settings.subjectRatios)
   const totalMinutes = blocks.reduce((sum, block) => sum + block.minutes, 0)
   const examLabel = settings.examDate ? formatDateLabel(settings.examDate) : '未设置考试日期'
+  const ratioTotal = SUBJECTS.reduce((sum, subject) => sum + draftRatios[subject.key], 0)
+  const isDefaultRatio = SUBJECTS.every(
+    (subject) => settings.subjectRatios[subject.key] === DEFAULT_SUBJECT_RATIOS[subject.key],
+  )
+
+  const toggleRatioPanel = () => {
+    if (!ratioOpen) setDraftRatios({ ...settings.subjectRatios })
+    setRatioOpen(!ratioOpen)
+  }
+
+  const updateDraftRatio = (key: SubjectKey, value: number) => {
+    setDraftRatios((prev) => ({
+      ...prev,
+      [key]: Math.min(100, Math.max(0, Math.round(value))),
+    }))
+  }
+
+  const handleRatioNumber = (key: SubjectKey, raw: string) => {
+    if (raw.trim() === '') return
+    const value = Number(raw)
+    if (Number.isNaN(value)) return
+    updateDraftRatio(key, value)
+  }
+
+  const applyRatios = () => {
+    if (ratioTotal !== 100) return
+    updateSettings({ subjectRatios: { ...draftRatios } })
+    setRatioOpen(false)
+  }
 
   const handleHoursChange = (raw: string) => {
     setHoursText(raw)
@@ -102,8 +137,84 @@ export function PlanPage() {
       <section className="card plan-blocks">
         <div className="card-title-row">
           <h2 className="card-title">今日建议时间块</h2>
-          <span className="card-note">共 {totalMinutes} 分钟</span>
+          <div className="plan-head-actions">
+            <span className="card-note">共 {totalMinutes} 分钟</span>
+            <button
+              type="button"
+              className={ratioOpen ? 'ratio-toggle is-open' : 'ratio-toggle'}
+              onClick={toggleRatioPanel}
+              aria-expanded={ratioOpen}
+            >
+              调整比例
+            </button>
+          </div>
         </div>
+
+        {ratioOpen ? (
+          <div className="ratio-editor">
+            {SUBJECTS.map((subject) => (
+              <div className="ratio-edit-row" key={subject.key}>
+                <span className="block-dot" style={{ background: subject.color }} />
+                <span className="ratio-edit-name">{subject.label}</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  step={5}
+                  value={draftRatios[subject.key]}
+                  onChange={(event) =>
+                    updateDraftRatio(subject.key, Number(event.target.value))
+                  }
+                  className="ratio-range"
+                  aria-label={`${subject.label}时间比例`}
+                />
+                <span className="ratio-edit-number">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={draftRatios[subject.key]}
+                    onChange={(event) => handleRatioNumber(subject.key, event.target.value)}
+                    aria-label={`${subject.label}比例百分比`}
+                  />
+                  <span className="ratio-percent">%</span>
+                </span>
+              </div>
+            ))}
+
+            <div className="ratio-summary">
+              <span>合计 {ratioTotal}%</span>
+              {ratioTotal === 100 ? (
+                <span className="ratio-ok">比例正好</span>
+              ) : (
+                <span className="ratio-warn">
+                  {ratioTotal > 100
+                    ? `超出 ${ratioTotal - 100}%`
+                    : `还差 ${100 - ratioTotal}%`}
+                </span>
+              )}
+            </div>
+
+            <div className="ratio-actions">
+              <button
+                type="button"
+                className="btn btn-outline ratio-btn"
+                onClick={() => setDraftRatios({ ...DEFAULT_SUBJECT_RATIOS })}
+              >
+                恢复默认比例
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary ratio-btn"
+                onClick={applyRatios}
+                disabled={ratioTotal !== 100}
+              >
+                应用比例
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <div className="ratio-bar" aria-hidden="true">
           {blocks.map((block) => (
@@ -129,7 +240,7 @@ export function PlanPage() {
         </div>
 
         <p className="plan-note">
-          按数学 40%、英语 25%、政治 15%、专业课 20% 分配，并按 15 分钟取整。
+          按当前比例分配，并按 15 分钟取整。{isDefaultRatio ? '当前为建议比例。' : '当前为自定义比例。'}
         </p>
       </section>
 
