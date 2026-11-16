@@ -1,0 +1,24 @@
+:root {
+  --ink-green: #1e3a34;
+  --seal-red: #a8402f;
+  --paper: #f7f1e5;
+  --ginkgo: #d9a441;
+  --bamboo: #6f8f72;
+  --ink: #2d2a26;
+
+  --card: #fcf8ee;
+  --card-deep: #f9f2e3;
+  --line: rgba(45, 42, 38, 0.1);
+  --line-strong: rgba(45, 42, 38, 0.16);
+  --muted: #7e776b;
+
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+
+  --shadow-card: 0 1px 0 rgba(45, 42, 38, 0.06), 0 10px 24px -20px rgba(45, 42, 38, 0.55);
+
+  --font-serif: "Songti SC", "STSong", "SimSun", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Segoe UI", sans-serif;
+}
