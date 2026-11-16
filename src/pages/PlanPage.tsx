@@ -105,7 +105,7 @@ export function PlanPage() {
           <input
             type="text"
             value={settings.examName}
-            placeholder="例如 2027 考研"
+            placeholder="例如 2028 考研"
             onChange={(event) => updateSettings({ examName: event.target.value })}
           />
         </label>

@@ -53,8 +53,8 @@ export function createSampleState(): StudyState {
 
   return {
     settings: {
-      examName: '2027 考研',
-      examDate: '2027-12-20',
+      examName: '2028 考研',
+      examDate: '2027-12-18',
       dailyHours: 4,
       subjectRatios: { math: 40, english: 25, politics: 15, major: 20 },
     },

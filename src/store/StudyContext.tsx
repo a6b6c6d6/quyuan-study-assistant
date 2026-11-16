@@ -20,8 +20,8 @@ function createEmptyState(settings?: Partial<Settings>): StudyState {
   const date = todayKey()
   return {
     settings: {
-      examName: '2027 考研',
-      examDate: '2027-12-20',
+      examName: '2028 考研',
+      examDate: '2027-12-18',
       dailyHours: 4,
       ...settings,
       subjectRatios: normalizeSubjectRatios(settings?.subjectRatios),
